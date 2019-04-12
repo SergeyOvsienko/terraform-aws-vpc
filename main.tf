@@ -1,21 +1,21 @@
 provider "aws" {
-  region     = "${var.aws_region}"
+  region = var.aws_region
 }
 
 data "aws_availability_zones" "az" {}
 
 resource "aws_vpc" "vpc" {
-  cidr_block = "${var.aws_vpc_cidr}"
+  cidr_block = var.aws_vpc_cidr
   enable_dns_hostnames = true
-  tags {
-    Name = "${var.aws_vpc_name}"
+  tags = {
+    Name = var.aws_vpc_name
   }
 }
 
 resource "aws_internet_gateway" "igw" {
   vpc_id = "${aws_vpc.vpc.id}"
-  tags {
-    Name = "${var.aws_vpc_name}-igw"
+  tags = {
+    Name = "var.aws_vpc_name-igw"
   }
 }
 
@@ -25,7 +25,7 @@ resource "aws_subnet" "subnets" {
   cidr_block = "${cidrsubnet(aws_vpc.vpc.cidr_block, 8, count.index + 1)}"
   availability_zone = "${data.aws_availability_zones.az.names[count.index]}"
   map_public_ip_on_launch = true
-  tags {
+  tags = {
     Name = "${data.aws_availability_zones.az.names[count.index]}-subnet"
   }
 }
@@ -38,20 +38,20 @@ resource "aws_default_route_table" "route_table" {
         gateway_id = "${aws_internet_gateway.igw.id}"
     }
 
-    tags {
-        Name = "${var.aws_vpc_name}-default-rt"
+    tags = {
+        Name = "var.aws_vpc_name-default-rt"
     }
 }
 
 resource "aws_security_group" "security_group" {
-    name = "${var.aws_vpc_name}-sg"
-    description = "${var.aws_vpc_name}-sg"
+    name = "var.aws_vpc_name-sg"
+    description = "var.aws_vpc_name-sg"
 
     ingress {
         from_port = 0
         to_port = 0
         protocol = "-1"
-        cidr_blocks = ["${var.aws_vpc_cidr}"]
+        cidr_blocks = [var.aws_vpc_cidr]
     }
     ingress {
         from_port = 22
@@ -70,8 +70,8 @@ resource "aws_security_group" "security_group" {
     
     vpc_id = "${aws_vpc.vpc.id}"
 
-    tags {
-        Name = "${var.aws_vpc_name}-sg"
+    tags = {
+        Name = "var.aws_vpc_name-sg"
     }
 }
 
